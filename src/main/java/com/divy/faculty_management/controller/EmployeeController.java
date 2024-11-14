@@ -8,15 +8,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+
 @RestController
-@RequestMapping("/api/employees")
+@RequestMapping("/api")
 public class EmployeeController {
 
     @Autowired
     private EmployeeService employeeService;
 
-    @PostMapping
+    @PostMapping("/employee")
     public Employee addEmployee(@RequestBody Employee employee) {
+        System.out.println("Received request to add employee: " + employee);
         return employeeService.saveEmployee(employee);
     }
 
