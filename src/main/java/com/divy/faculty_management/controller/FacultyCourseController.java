@@ -1,5 +1,6 @@
 package com.divy.faculty_management.controller;
 
+import com.divy.faculty_management.dto.AssignCourseRequest;
 import com.divy.faculty_management.service.CourseScheduleService;
 import com.divy.faculty_management.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ public class FacultyCourseController {
     private CourseScheduleService courseScheduleService; // Service to fetch course schedule details
 
     @PostMapping("/assign")
-    public String assignCourses(@RequestBody Long courseId) {
-        return courseScheduleService.assignCourses(courseId);
+    public String assignCourses(@RequestBody AssignCourseRequest assignCourseRequest) {
+        return courseScheduleService.assignCourseToFaculty(assignCourseRequest.getFacultyId(), assignCourseRequest.getCourseId());
     }
 }
