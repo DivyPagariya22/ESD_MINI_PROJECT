@@ -1,13 +1,17 @@
 package com.divy.faculty_management.service;
 
 import com.divy.faculty_management.dto.FacultyRegistrationRequest;
+import com.divy.faculty_management.dto.LoginRequest;
 import com.divy.faculty_management.entity.Course;
 import com.divy.faculty_management.entity.Employee;
 import com.divy.faculty_management.entity.FacultyCourse;
+import com.divy.faculty_management.helper.EncryptionService;
+import com.divy.faculty_management.helper.JWTHelper;
 import com.divy.faculty_management.repository.CourseRepository;
 import com.divy.faculty_management.repository.EmployeeRepository;
 import com.divy.faculty_management.repository.FacultyCourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +22,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.nio.file.Path;
+
+import static java.lang.String.format;
 
 
 @Service
@@ -33,6 +39,12 @@ public class EmployeeService {
 
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired
+    private EncryptionService encryptionService;
+
+    @Autowired
+    private JWTHelper jwtHelper;
 
 
     public Employee saveEmployee(Employee employee) {
@@ -71,17 +83,24 @@ public class EmployeeService {
 
 
     // New Method
-    public Employee registerFaculty(FacultyRegistrationRequest request) throws IOException {
+    public String registerFaculty(FacultyRegistrationRequest request) throws IOException {
         // Create new employee object
         Employee employee = new Employee();
-        employee.setFirstName(request.getFirstName());
-        employee.setLastName(request.getLastName());
-        employee.setEmail(request.getEmail());
-        employee.setTitle(request.getTitle());
-        employee.setDepartment(request.getDepartment());
+        employee.setEmail(request.email());
+
+        if (employeeRepository.existsByEmail(employee.getEmail())) {
+            throw new IllegalArgumentException("Email already exists: " + employee.getEmail());
+        }
+
+        employee.setFirstName(request.firstName());
+        employee.setLastName(request.lastName());
+
+        employee.setTitle(request.title());
+        employee.setDepartment(request.department());
+        employee.setPassword(encryptionService.encode(request.password()));
 
 
-        MultipartFile photograph = request.getPhotograph();
+        MultipartFile photograph = request.photograph();
 
         Path path = Paths.get(photoDirectory);
         if (!Files.exists(path)) {
@@ -108,7 +127,7 @@ public class EmployeeService {
         Employee savedEmployee = employeeRepository.save(employee);
 
         // Assign selected courses to faculty
-        List<Long> courseIds = request.getCourseIds();
+        List<Long> courseIds = request.courseIds();
         if (courseIds != null) {
             for (Long courseId : courseIds) {
                 Optional<Course> courseOptional = courseRepository.findById(courseId);
@@ -121,9 +140,28 @@ public class EmployeeService {
             }
         }
 
-        return savedEmployee;
+        return savedEmployee.getEmail();
     }
 
 
+
+    public String login(LoginRequest request) {
+
+        Employee employee = getEmail(request.email());
+        if(!encryptionService.validates(request.password(), employee.getPassword())) {
+
+            return "Wrong Password or Email";
+        }
+
+        return jwtHelper.generateToken(request.email());
+
+    }
+
+    private Employee getEmail(String email) {
+        return employeeRepository.findByEmail(email)
+                .orElseThrow(() -> new ExpressionException(
+                        format("Cannot Find Customer:: No Employee found:: %s", email)
+                ));
+    }
 }
 
