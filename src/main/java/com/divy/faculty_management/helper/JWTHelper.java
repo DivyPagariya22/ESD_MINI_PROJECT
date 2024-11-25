@@ -50,7 +50,7 @@ public class JWTHelper {
     // Create token with claims
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60)) // Token valid for 10 hours
+                .setExpiration(new Date(System.currentTimeMillis() + (24 * 60 * 60 * 1000))) // Token valid for 24 hours
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
     }
 

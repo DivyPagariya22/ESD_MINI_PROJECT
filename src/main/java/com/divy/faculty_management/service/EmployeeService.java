@@ -147,7 +147,7 @@ public class EmployeeService {
 
     public String login(LoginRequest request) {
 
-        Employee employee = getEmail(request.email());
+        Employee employee = getEmployee(request.email());
         if(!encryptionService.validates(request.password(), employee.getPassword())) {
 
             return "Wrong Password or Email";
@@ -157,11 +157,24 @@ public class EmployeeService {
 
     }
 
-    private Employee getEmail(String email) {
+    public Employee getEmployee(String email) {
         return employeeRepository.findByEmail(email)
                 .orElseThrow(() -> new ExpressionException(
                         format("Cannot Find Customer:: No Employee found:: %s", email)
                 ));
+    }
+
+
+    public String validateAndExtractEmail(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Invalid Authorization header");
+        }
+        String token = authHeader.substring(7);
+
+        if (!jwtHelper.isTokenValid(token)) {
+            throw new RuntimeException("Invalid or expired token");
+        }
+        return jwtHelper.extractEmail(token);
     }
 }
 
