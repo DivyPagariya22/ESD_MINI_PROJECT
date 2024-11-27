@@ -12,7 +12,7 @@ public record LoginRequest (
 
     @NotNull(message = "Password should be present")
     @NotEmpty(message = "Password should be present")
-    @Size(min = 6, max = 12)
+    @Size(min = 4, max = 24)
     @JsonProperty("password")
     String password
 ) {

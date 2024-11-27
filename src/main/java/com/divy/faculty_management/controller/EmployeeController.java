@@ -4,6 +4,7 @@ import com.divy.faculty_management.entity.Course;
 import com.divy.faculty_management.entity.Employee;
 import com.divy.faculty_management.entity.FacultyCourse;
 import com.divy.faculty_management.helper.ProfileCard;
+import com.divy.faculty_management.helper.Register;
 import com.divy.faculty_management.repository.FacultyCourseRepository;
 import com.divy.faculty_management.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/employee")
 public class EmployeeController {
+
+    @Autowired
+    private Register registerHelper;
 
     @Autowired
     private FacultyCourseRepository facultyCourseRepository;
@@ -43,40 +47,42 @@ public class EmployeeController {
     public ProfileCard getEmployeeById(@RequestHeader("Authorization") String authHeader) {
         System.out.println("Received request to add employee: " + authHeader);
 
-        String email = employeeService.validateAndExtractEmail(authHeader);
-        Employee employee = employeeService.getEmployee(email);
-        employee.setPassword(null);
-        if (employee != null) {
-            try {
-                File file = new File(employee.getPhotographPath());
-                byte[] fileContent = Files.readAllBytes(file.toPath());
-                String base64Image = Base64.getEncoder().encodeToString(fileContent); // Using java.util.Base64
-                employee.setPhotographPath(base64Image);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        return registerHelper.getProfileCard(authHeader);
 
-        // Get the list of courses that this faculty teaches
-        List<FacultyCourse> facultyCourses = facultyCourseRepository.findByFaculty(employee);
-
-        // Convert FacultyCourse to Course
-        List<Course> courses = facultyCourses.stream()
-                .map(facultyCourse -> facultyCourse.getCourse())  // Get the associated Course from FacultyCourse
-                .collect(Collectors.toList());
-
-        // Log the course details (optional)
-        courses.forEach(course -> System.out.println(course.getName()));
-
-
-        System.out.println(employee.getEmail());
-        System.out.println(courses.size());
-        ProfileCard profileCard = new ProfileCard();
-
-        profileCard.setEmployee(employee);
-        profileCard.setCourses(courses);
-
-        return profileCard;
+//        String email = employeeService.validateAndExtractEmail(authHeader);
+//        Employee employee = employeeService.getEmployee(email);
+//        employee.setPassword(null);
+//        if (employee != null) {
+//            try {
+//                File file = new File(employee.getPhotographPath());
+//                byte[] fileContent = Files.readAllBytes(file.toPath());
+//                String base64Image = Base64.getEncoder().encodeToString(fileContent); // Using java.util.Base64
+//                employee.setPhotographPath(base64Image);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        // Get the list of courses that this faculty teaches
+//        List<FacultyCourse> facultyCourses = facultyCourseRepository.findByFaculty(employee);
+//
+//        // Convert FacultyCourse to Course
+//        List<Course> courses = facultyCourses.stream()
+//                .map(facultyCourse -> facultyCourse.getCourse())  // Get the associated Course from FacultyCourse
+//                .collect(Collectors.toList());
+//
+//        // Log the course details (optional)
+//        courses.forEach(course -> System.out.println(course.getName()));
+//
+//
+//        System.out.println(employee.getEmail());
+//        System.out.println(courses.size());
+//        ProfileCard profileCard = new ProfileCard();
+//
+//        profileCard.setEmployee(employee);
+//        profileCard.setCourses(courses);
+//
+//        return profileCard;
     }
 }
 

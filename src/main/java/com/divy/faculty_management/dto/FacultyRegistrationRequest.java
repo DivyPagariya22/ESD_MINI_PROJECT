@@ -36,7 +36,7 @@ public record FacultyRegistrationRequest(
 
         @NotNull(message = "Password is required")
         @NotEmpty(message = "Password cannot be empty")
-        @Size(min = 6, max = 12, message = "Password must be between 8 and 16 characters")
+        @Size(min = 4, max = 24, message = "Password must be between 8 and 16 characters")
         String password,
 
         @NotNull(message = "Photograph is required")

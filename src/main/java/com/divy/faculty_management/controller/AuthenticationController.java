@@ -17,7 +17,7 @@ public class AuthenticationController {
 
     private  final EmployeeService employeeService;
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid LoginRequest request) {
+    public ResponseEntity<String> login(@RequestBody @Valid LoginRequest request) throws Exception {
         return ResponseEntity.ok(employeeService.login(request));
     }
 }

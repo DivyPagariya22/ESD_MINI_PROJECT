@@ -5,6 +5,7 @@ import com.divy.faculty_management.dto.LoginRequest;
 import com.divy.faculty_management.entity.Course;
 import com.divy.faculty_management.entity.Employee;
 import com.divy.faculty_management.entity.FacultyCourse;
+import com.divy.faculty_management.exception.GlobalExceptionHandler;
 import com.divy.faculty_management.helper.EncryptionService;
 import com.divy.faculty_management.helper.JWTHelper;
 import com.divy.faculty_management.repository.CourseRepository;
@@ -28,6 +29,8 @@ import static java.lang.String.format;
 
 @Service
 public class EmployeeService {
+
+
 
     @Autowired
     private EmployeeRepository employeeRepository;
@@ -145,12 +148,14 @@ public class EmployeeService {
 
 
 
-    public String login(LoginRequest request) {
+    public String login(LoginRequest request) throws Exception {
 
         Employee employee = getEmployee(request.email());
+        if(employee.getEmail() == null) {
+            throw new Exception("Wrong email");
+        }
         if(!encryptionService.validates(request.password(), employee.getPassword())) {
-
-            return "Wrong Password or Email";
+            throw new Exception("Wrong password");
         }
 
         return jwtHelper.generateToken(request.email());
