@@ -15,14 +15,9 @@ import java.util.function.Function;
 public class JWTHelper {
     private String SECRET_KEY = "cr666N7wIV+KJ2xOQpWtcfAekL4YXd9gbnJMs8SJ9sI=";
 
-    // Extract username from the token
-    public String extractUsername(String token) {
+    // Extract email from the token
+    public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
-    }
-
-    // Extract expiration date from the token
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
     }
 
     // Extract claims
@@ -36,15 +31,10 @@ public class JWTHelper {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
     }
 
-    // Check if token is expired
-    private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
     // Generate token
-    public String generateToken(String username) {
+    public String generateToken(String email) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        return createToken(claims, email);
     }
 
     // Create token with claims
@@ -54,16 +44,6 @@ public class JWTHelper {
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
     }
 
-    // Validate token
-    public Boolean validateToken(String token, String username) {
-        final String extractedUsername = extractUsername(token);
-//        return (extractedUsername.equals(username) && !isTokenExpired(token));
-        return !isTokenExpired(token);
-    }
-
-    public String extractEmail(String token) {
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
-    }
 
     public boolean isTokenValid(String token) {
         try {
